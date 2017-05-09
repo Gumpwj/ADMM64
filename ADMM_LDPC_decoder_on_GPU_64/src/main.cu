@@ -136,6 +136,10 @@ int main(int argc, char* argv[])
 	double snr_max  = 4.51;
 	double snr_step = 0.50;
 
+        double _alpha   = 0.8;
+        double _mu      = 3.0f;
+        double _rho     = 1.9f;
+
 	//int algo                  = 0;
         int NOMBRE_ITERATIONS     = 200;
 	//int REAL_ENCODER          =  0;
@@ -328,7 +332,7 @@ cudaThreadSynchronize();
              
                // printf("data: %f\n", *data);
 
-                    decoder_1.decode(simu_data_1.get_t_noise_data(), simu_data_1.get_t_decode_data(), NOMBRE_ITERATIONS );
+                    decoder_1.decode(simu_data_1.get_t_noise_data(), simu_data_1.get_t_decode_data(), NOMBRE_ITERATIONS, _alpha, _mu, _rho);
 		    //decoder_1.decode(llrs, simu_data_1.get_t_decode_data(), NOMBRE_ITERATIONS );//simu_data_1.get_t_noise_data()
 
                    /* int *de_code = simu_data_1.get_t_decode_data();

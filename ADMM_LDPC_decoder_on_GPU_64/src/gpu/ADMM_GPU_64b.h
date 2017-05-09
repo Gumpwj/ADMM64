@@ -30,13 +30,16 @@ extern __global__ void ADMM_VN_kernel_deg3(
 	double *OutputFromDecoder,
 	double *LZr,
 	const unsigned int *t_row,
-	int N);
+	int N,
+        double _alpha,
+        double _mu);
 
 extern  __global__ void ADMM_CN_kernel_deg6(
 	const double *OutputFromDecoder,
 	double *LZr,
 	const unsigned int *t_col1,
 	int *cn_synrome,
-	int N);
+	int N,
+        double _rho);
 
 #endif /* GPU_FUNCTIONS_H_ */

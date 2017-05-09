@@ -313,11 +313,11 @@ __global__ void ADMM_InitArrays_64b(double* LZr, int N)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 __global__ void ADMM_VN_kernel_deg3(
-	const double* _LogLikelihoodRatio, double* OutputFromDecoder, double* LZr, const unsigned int *t_row, int N)
+	const double* _LogLikelihoodRatio, double* OutputFromDecoder, double* LZr, const unsigned int *t_row, int N, double _alpha, double _mu)
 {
     const int i             = blockDim.x * blockIdx.x + threadIdx.x;
-	const double mu      = 3.0f;
-	const double  alpha  = 0.8;
+	const double mu      = _mu;
+	const double alpha   = _alpha;
 	const double _amu_   = alpha / mu;
 	const double _2_amu_ = _amu_+ _amu_;
     const double factor  = 1.0f / (3.0f - _2_amu_);
@@ -333,7 +333,7 @@ __global__ void ADMM_VN_kernel_deg3(
         #pragma unroll 3
         for(int k = 0; k < degVn; k++)
         {
-        	const int pos = 3 * i + k;
+        	//const int pos = 3 * i + k;
         	const int off = tab[k];//t_row[ pos ];
 #ifdef DOUBLE2
         	const double2* ptr = reinterpret_cast<double2*>(LZr);
@@ -355,10 +355,10 @@ __global__ void ADMM_VN_kernel_deg3(
 
 
 __global__ void ADMM_CN_kernel_deg6(
-	const double *OutputFromDecoder, double *LZr, const unsigned int *t_col1, int *cn_synrome, int N)
+	const double *OutputFromDecoder, double *LZr, const unsigned int *t_col1, int *cn_synrome, int N, double _rho)
 {
     const int i = blockDim.x * blockIdx.x + threadIdx.x; // NUMERO DU CHECK NODE A CALCULER
-	const double rho      = 1.9f;
+	const double rho      = _rho;//1.9f
 	const double un_m_rho = 1.0f - rho;
 	const int   degCn    = 6;
         double v_proj[6], ztemp [6];

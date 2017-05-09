@@ -63,6 +63,6 @@ public:
     ADMM_GPU_decoder_64b( int frames );
     ~ADMM_GPU_decoder_64b();
     void initialize();
-    void decode(double* llrs, int* bits, int nb_iters);
+    void decode(double* llrs, int* bits, int nb_iters, double _alpha, double _mu, double _rho);
 };
 

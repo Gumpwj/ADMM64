@@ -105,10 +105,13 @@ ADMM_GPU_decoder_64b::~ADMM_GPU_decoder_64b()
 	Status = cudaFree(LZr);				ERROR_CHECK(Status, (char*)__FILE__, __LINE__);
 }
 
-void ADMM_GPU_decoder_64b::decode(double* llrs, int* bits, int nb_iters)
+void ADMM_GPU_decoder_64b::decode(double* llrs, int* bits, int nb_iters, double _alpha, double _mu, double _rho)
 {
     cudaError_t Status;
 
+    const double mu      = _mu;
+    const double alpha   = _alpha;
+    const double rho     = _rho;
 
     int threadsPerBlock     = 128;
     int blocksPerGridNode   = (VNs_per_load  + threadsPerBlock - 1) / threadsPerBlock;
@@ -130,11 +133,11 @@ void ADMM_GPU_decoder_64b::decode(double* llrs, int* bits, int nb_iters)
     for(int k = 0; k < 200; k++)
     {
     	ADMM_VN_kernel_deg3<<<blocksPerGridNode,  threadsPerBlock>>>
-    			(d_iLLR, d_oLLR, LZr, d_t_row, VNs_per_load);
+    			(d_iLLR, d_oLLR, LZr, d_t_row, VNs_per_load, alpha, mu);
 
        //print d_iLLR
 
-        Status = cudaMemcpy(h_iLLR, d_oLLR, VNs_per_load * sizeof(double), cudaMemcpyDeviceToHost);
+       /* Status = cudaMemcpy(h_iLLR, d_oLLR, VNs_per_load * sizeof(double), cudaMemcpyDeviceToHost);
         ERROR_CHECK(Status, __FILE__, __LINE__);
         FILE* f1 = fopen("h_iLLR_64.json", "w");
           for(int m=1; m<frames+1; m++){
@@ -143,13 +146,13 @@ void ADMM_GPU_decoder_64b::decode(double* llrs, int* bits, int nb_iters)
                  fprintf(f1, "frames %d   iter %d   bit %4d   value %4f\n", m, k, i, h_iLLR[i]);
 	    }
 	}
-        fclose( f1 );
+        fclose( f1 );*/
        //
 
         ERROR_CHECK(cudaGetLastError( ), __FILE__, __LINE__);
 
         ADMM_CN_kernel_deg6<<<blocksPerGridCheck, threadsPerBlock>>>
-        		(d_oLLR, LZr, d_t_col, d_hDecision, CNs_per_load);
+        		(d_oLLR, LZr, d_t_col, d_hDecision, CNs_per_load, rho);
         ERROR_CHECK(cudaGetLastError( ), __FILE__, __LINE__);
 
         // GESTION DU CRITERE D'ARRET DES CODEWORDS
@@ -194,14 +197,14 @@ void ADMM_GPU_decoder_64b::decode(double* llrs, int* bits, int nb_iters)
     Status = cudaMemcpy(bits, d_hDecision, VNs_per_load * sizeof(int), cudaMemcpyDeviceToHost);
     ERROR_CHECK(Status, __FILE__, __LINE__);
 
-      FILE* fp = fopen("bits64.txt", "w");
+     /* FILE* fp = fopen("bits64.txt", "w");
       for(int m=1; m<frames+1; m++){
 	    for(int i=0; i<VNs_per_frame; i++){
                 //int off = VNs_per_frame * k;
                 fprintf(fp, "frame %d   bit %4d   value %d\n", m, i, bits[i]);
 	    }
 	}
-      fclose(fp);
+      fclose(fp);*/
 
 //	for (int i=0; i<VNs_per_load; i++){
 //		bits[i] = h_hDecision[i];
